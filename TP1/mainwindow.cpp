@@ -39,187 +39,65 @@ void MainWindow::showSelections(MyMesh* _mesh)
     qDebug() << "Aire max : " << aire_max;
 
 
-    std::vector<float> t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
-    float aire_limite1 = aire_min+ 0.1*(aire_max-aire_min);
-    float aire_limite2 = aire_limite1+ 0.1*(aire_max-aire_min);
-    float aire_limite3 = aire_limite2+ 0.1*(aire_max-aire_min);
-    float aire_limite4 = aire_limite3+ 0.1*(aire_max-aire_min);
-    float aire_limite5 = aire_limite4+ 0.1*(aire_max-aire_min);
-    float aire_limite6 = aire_limite5+ 0.1*(aire_max-aire_min);
-    float aire_limite7 = aire_limite6+ 0.1*(aire_max-aire_min);
-    float aire_limite8 = aire_limite7+ 0.1*(aire_max-aire_min);
-    float aire_limite9 = aire_limite8+ 0.1*(aire_max-aire_min);
+    unsigned int t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
+    t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = t10 = 0;
+    float ecart = 0.1*(aire_max-aire_min);
+    float aire_limite1 = aire_min + ecart;
+    float aire_limite2 = aire_limite1 + ecart;
+    float aire_limite3 = aire_limite2 + ecart;
+    float aire_limite4 = aire_limite3 + ecart;
+    float aire_limite5 = aire_limite4 + ecart;
+    float aire_limite6 = aire_limite5 + ecart;
+    float aire_limite7 = aire_limite6 + ecart;
+    float aire_limite8 = aire_limite7 + ecart;
+    float aire_limite9 = aire_limite8 + ecart;
+
     for(float i = 0 ; i <= aires.size(); i++)
     {
         if (aires[i] >= aire_min && aires[i] < aire_limite1) {
-            t1.push_back(aires[i]);
-        }
-        else if (aires[i] >= aire_limite1 && aires[i] < aire_limite2) {
-            t2.push_back(aires[i]);
-        }
-        else if (aires[i] >= aire_limite2 && aires[i] < aire_limite3) {
-            t3.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite3 && aires[i] < aire_limite4) {
-            t4.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite4 && aires[i] < aire_limite5) {
-            t5.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite5 && aires[i] < aire_limite6) {
-            t6.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite6 && aires[i] < aire_limite7) {
-            t7.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite7 && aires[i] < aire_limite8) {
-            t8.push_back(aires[i]);
-        }else if (aires[i] >= aire_limite8 && aires[i] < aire_limite9) {
-            t9.push_back(aires[i]);
-        } else if (aires[i] >= aire_limite9 && aires[i] < aire_max) {
-            t10.push_back(aires[i]);
+            t1++;
+        } else if (aires[i] >= aire_limite1 && aires[i] < aire_limite2) {
+            t2++;
+        } else if (aires[i] >= aire_limite2 && aires[i] < aire_limite3) {
+            t3++;
+        } else if (aires[i] >= aire_limite3 && aires[i] < aire_limite4) {
+            t4++;
+        } else if (aires[i] >= aire_limite4 && aires[i] < aire_limite5) {
+            t5++;
+        } else if (aires[i] >= aire_limite5 && aires[i] < aire_limite6) {
+            t6++;
+        } else if (aires[i] >= aire_limite6 && aires[i] < aire_limite7) {
+            t7++;
+        } else if (aires[i] >= aire_limite7 && aires[i] < aire_limite8) {
+            t8++;
+        } else if (aires[i] >= aire_limite8 && aires[i] < aire_limite9) {
+            t9++;
+        } else if (aires[i] >= aire_limite9 && aires[i] <= aire_max) {
+            t10++;
         }
     }
 
+    qDebug() << "Nb Total Triangles : " << _mesh->n_faces();
+    qDebug() << "Nb Triangles aire entre " << aire_min << " et " << aire_limite1 << " : " << t1;
+    qDebug() << "Nb Triangles aire entre " << aire_limite1 << " et " << aire_limite2 << " : " << t2;
+    qDebug() << "Nb Triangles aire entre " << aire_limite2 << " et " << aire_limite3 << " : " << t3;
+    qDebug() << "Nb Triangles aire entre " << aire_limite3 << " et " << aire_limite4 << " : " << t4;
+    qDebug() << "Nb Triangles aire entre " << aire_limite4 << " et " << aire_limite5 << " : " << t5;
+    qDebug() << "Nb Triangles aire entre " << aire_limite5 << " et " << aire_limite6 << " : " << t6;
+    qDebug() << "Nb Triangles aire entre " << aire_limite6 << " et " << aire_limite7 << " : " << t7;
+    qDebug() << "Nb Triangles aire entre " << aire_limite7 << " et " << aire_limite8 << " : " << t8;
+    qDebug() << "Nb Triangles aire entre " << aire_limite8 << " et " << aire_limite9 << " : " << t9;
+    qDebug() << "Nb Triangles aire entre " << aire_limite9 << " et " << aire_max << " : " << t10;
 
-    // on réinitialise les couleurs de tout le maillage
-    /*resetAllColorsAndThickness(_mesh);
-    qDebug() << "Nombre de sommets : " << _mesh->n_vertices();
-    qDebug() << "Nombre d'arêtes : " << _mesh->n_edges();
-    qDebug() << "Nombre de demi-arêtes : " << _mesh->n_halfedges();
-    qDebug() << "Nombre de faces : " << _mesh->n_faces();
-
-    if (vertexSelection > -1 && vertexSelection < _mesh->n_vertices()) {
-        VertexHandle vh = _mesh->vertex_handle(vertexSelection);
-        _mesh->set_color(vh, MyMesh::Color(255, 0, 0));
-        _mesh->data(vh).thickness *= 10;
-    }
-
-    if (edgeSelection > -1 && edgeSelection < _mesh->n_edges()) {
-        EdgeHandle eh = _mesh->edge_handle(edgeSelection);
-        _mesh->set_color(eh, MyMesh::Color(0, 255, 0));
-        _mesh->data(eh).thickness *= 10;
-    }
-
-    if (faceSelection > -1 && faceSelection < _mesh->n_faces()) {
-        FaceHandle fh = _mesh->face_handle(faceSelection);
-        _mesh->set_color(fh, MyMesh::Color(0, 0, 255));
-    }
-
-    // on affiche le nouveau maillage
-    displayMesh(_mesh);*/
+    qDebug() << "Somme = " << t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10;
 }
-
-
-
-
-
-void MainWindow::showSelectionsNeighborhood(MyMesh* _mesh)
-{
-    // on réinitialise les couleurs de tout le maillage
-    resetAllColorsAndThickness(_mesh);
-
-    // circulate around the current vertex
-    if (vertexSelection > -1 && vertexSelection < _mesh->n_vertices()) {
-        VertexHandle vh = _mesh->vertex_handle(vertexSelection);
-        _mesh->data(vh).thickness *= 10;
-        for (MyMesh::VertexEdgeIter ve_it=mesh.ve_iter(vh); ve_it.is_valid(); ++ve_it) {
-            _mesh->set_color(*ve_it, MyMesh::Color(255, 0, 0));
-        }
-    }
-
-    if (edgeSelection > -1 && edgeSelection < _mesh->n_edges()) {
-        EdgeHandle eh = _mesh->edge_handle(edgeSelection);
-        _mesh->set_color(eh, MyMesh::Color(0, 255, 0));
-        _mesh->data(eh).thickness *= 10;
-        // parcours de toutes les faces, et des sommets de chaque face
-        for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++)
-        {
-            for (MyMesh::FaceEdgeIter curEdge = _mesh->fe_iter(*curFace); curEdge.is_valid(); curEdge++)
-            {
-                if (*curEdge == eh) {
-                    _mesh->set_color(*curFace, MyMesh::Color(64, 255, 0));
-                    continue;
-                }
-            }
-        }
-    }
-
-    if (faceSelection > -1 && faceSelection < _mesh->n_faces()) {
-        FaceHandle fh = _mesh->face_handle(faceSelection);
-        _mesh->set_color(fh, MyMesh::Color(0, 0, 255));
-        for (MyMesh::FaceFaceIter ff_it = mesh.ff_iter(fh) ; ff_it.is_valid() ; ++ff_it) {
-            _mesh->set_color(*ff_it, MyMesh::Color(0, 64, 255));
-        }
-    }
-
-    // on affiche le nouveau maillage
-    displayMesh(_mesh);
-}
-
-
-
-void MainWindow::showBorder(MyMesh* _mesh)
-{
-    // on réinitialise l'affichage
-    resetAllColorsAndThickness(_mesh);
-
-    //is_boundary (EdgeHandle _eh)
-    for (MyMesh::EdgeIter curEdge = _mesh->edges_begin(); curEdge != _mesh->edges_end(); curEdge++)
-    {
-        EdgeHandle eh = *curEdge;
-        if (_mesh->is_boundary(eh)) {
-            _mesh->set_color(eh, MyMesh::Color(255,0,255));
-            _mesh->data(eh).thickness *= 10;
-        }
-    }
-
-    // on affiche le nouveau maillage
-    displayMesh(_mesh);
-}
-
-
-void MainWindow::showPath(MyMesh* _mesh, int v1, int v2)
-{
-    // on réinitialise l'affichage
-    resetAllColorsAndThickness(_mesh);
-
-    VertexHandle v1_h = _mesh->vertex_handle(v1);
-    VertexHandle v2_h = _mesh->vertex_handle(v2);
-    // point de départ et point d'arrivée en vert et en gros
-    _mesh->set_color(v1_h, MyMesh::Color(0, 255, 0));
-    _mesh->set_color(v2_h, MyMesh::Color(0, 255, 0));
-    _mesh->data(_mesh->vertex_handle(v1)).thickness = 12;
-    _mesh->data(_mesh->vertex_handle(v2)).thickness = 12;
-
-    QVector<VertexHandle> handles;
-    for (MyMesh::VertexVertexIter vv_it = mesh.vv_iter(v1_h) ; vv_it->idx() != v2 && vv_it.is_valid() ;) {
-        while (handles.contains(vv_it))
-            ++vv_it;
-        _mesh->set_color(*vv_it, MyMesh::Color(0, 64, 255));
-        _mesh->data(*vv_it).thickness = 12;
-        handles.push_back(vv_it);
-        vv_it = mesh.vv_iter(*vv_it);
-        qDebug() << vv_it->idx();
-    }
-    _mesh->set_color(v1_h, MyMesh::Color(0, 255, 0));
-    _mesh->set_color(v2_h, MyMesh::Color(0, 255, 0));
-
-    /*HalfedgeHandle heh, heh_fin;
-    heh_fin = _mesh.halfedge_handle(v2_h);
-    heh = _mesh.halfedge_handle(v1_h);
-    while(heh != heh_fin) {
-            //heh = mesh.next_halfedge_handle(heh);
-            _mesh->set_color(heh, MyMesh::Color(255,0,0));
-    }*/
-
-    // on affiche le nouveau maillage
-    displayMesh(_mesh);
-}
-
-/* **** fin de la partie à compléter **** */
 
 
 /* **** début de la partie boutons et IHM **** */
 
 void MainWindow::on_pushButton_bordure_clicked()
 {
-    showBorder(&mesh);
+    //showBorder(&mesh);
 }
 
 void MainWindow::on_pushButton_voisinage_clicked()
@@ -239,8 +117,8 @@ void MainWindow::on_pushButton_voisinage_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 
@@ -253,8 +131,8 @@ void MainWindow::on_pushButton_vertexMoins_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_vertexPlus_clicked()
@@ -266,8 +144,8 @@ void MainWindow::on_pushButton_vertexPlus_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_edgeMoins_clicked()
@@ -279,8 +157,8 @@ void MainWindow::on_pushButton_edgeMoins_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_edgePlus_clicked()
@@ -292,8 +170,8 @@ void MainWindow::on_pushButton_edgePlus_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_faceMoins_clicked()
@@ -305,8 +183,8 @@ void MainWindow::on_pushButton_faceMoins_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_facePlus_clicked()
@@ -318,8 +196,8 @@ void MainWindow::on_pushButton_facePlus_clicked()
     // on montre la nouvelle selection
     if(!modevoisinage)
         showSelections(&mesh);
-    else
-        showSelectionsNeighborhood(&mesh);
+    //else
+        //showSelectionsNeighborhood(&mesh);
 }
 
 void MainWindow::on_pushButton_afficherChemin_clicked()
@@ -328,7 +206,7 @@ void MainWindow::on_pushButton_afficherChemin_clicked()
     int indexV1 = ui->spinBox_v1_chemin->value();
     int indexV2 = ui->spinBox_v2_chemin->value();
 
-    showPath(&mesh, indexV1, indexV2);
+    //showPath(&mesh, indexV1, indexV2);
 }
 
 
