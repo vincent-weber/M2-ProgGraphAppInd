@@ -1,7 +1,104 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-void MainWindow::showSelections(MyMesh* _mesh)
+void MainWindow::nbFacesSommetsAretes(MyMesh *_mesh) {
+    qDebug() << "Nombre de faces : " << _mesh->n_faces();
+    qDebug() << "Nombre d'aretes : " << _mesh->n_edges();
+    qDebug() << "Nombre de sommets : " << _mesh->n_vertices();
+}
+
+void MainWindow::verifTopologie(MyMesh *_mesh) {
+    bool facesQueTriangulaires = true;
+    int nbFacesNonTriangulaires = 0;
+    int nbFacesSeules = 0;
+    int nbAretesSeules = 0;
+    int nbSommetsSeuls = 0;
+
+    //VERIF FACES
+    for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
+        /*int nbSommetsAdjacents = 0;
+
+        Ce for ci-dessous a fait crash mon ordi 2 fois
+
+        for (MyMesh::FaceVertexIter curVert = _mesh->fv_iter(*curFace) ; curVert->is_valid(); ++curVert, ++nbSommetsAdjacents);
+        if (nbSommetsAdjacents != 3) {
+            facesQueTriangulaires = false;
+            ++nbFacesNonTriangulaires;
+        }*/
+        int nbFacesAdjacentes = 0;
+        for (MyMesh::FaceFaceIter curFace2 = _mesh->ff_iter(*curFace) ; curFace2.is_valid() ; ++curFace2, ++nbFacesAdjacentes);
+        if (nbFacesAdjacentes == 0) {
+            ++nbFacesSeules;
+        }
+    }
+
+    if (facesQueTriangulaires) {
+        qDebug() << "Le maillage ne possède que des faces triangulaires.";
+    } else {
+        qDebug() << "Le maillage possède " << nbFacesNonTriangulaires << " faces non triangulaires.";
+    }
+
+    qDebug() << "Le maillage contient " << nbFacesSeules << " faces seules.";
+
+    //VERIF ARETES
+    for (MyMesh::EdgeIter curEdge = _mesh->edges_begin(); curEdge != _mesh->edges_end() ; ++curEdge) {
+        HalfedgeHandle h1 = _mesh->halfedge_handle(*curEdge, 0);
+        FaceHandle f1 = _mesh->face_handle(h1);
+        HalfedgeHandle h2 = _mesh->halfedge_handle(*curEdge, 1);
+        FaceHandle f2 = _mesh->face_handle(h2);
+
+        if (!f1.is_valid() && !f2.is_valid()) {
+            ++nbAretesSeules;
+        }
+    }
+
+    qDebug() << "Le maillage contient " << nbAretesSeules << " aretes seules.";
+
+    //VERIF SOMMETS
+    for (MyMesh::VertexIter curVert = _mesh->vertices_begin() ; curVert != _mesh->vertices_end() ; ++curVert) {
+        int nbAretesAdjacentes = 0;
+        for (MyMesh::VertexEdgeIter curEdge = _mesh->ve_iter(*curVert) ; curEdge.is_valid() ; ++curEdge, ++nbAretesAdjacentes);
+        if (nbAretesAdjacentes == 0) {
+            ++nbSommetsSeuls;
+        }
+    }
+
+    qDebug() << "Le maillage contient " << nbSommetsSeuls << " sommets seuls.";
+}
+
+void MainWindow::boiteEnglobante(MyMesh *_mesh) {
+
+}
+
+void MainWindow::barycentre(MyMesh* _mesh) {
+    double sumX = 0;
+    double sumY = 0;
+    double sumZ = 0;
+
+    for (MyMesh::VertexIter v_it=_mesh->vertices_begin(); v_it!=_mesh->vertices_end(); ++v_it) {
+        MyMesh::Point sommet_courant = _mesh->point(*v_it);
+        sumX += sommet_courant[0];
+        sumY += sommet_courant[1];
+        sumZ += sommet_courant[2];
+    }
+
+    MyMesh::Point barycentre;
+    barycentre[0] = sumX / _mesh->n_vertices();
+    barycentre[1] = sumY / _mesh->n_vertices();
+    barycentre[2] = sumZ / _mesh->n_vertices();
+    qDebug() << "Barycentre de coordonnées : [ " << barycentre[0] << ", " << barycentre[1] << ", " << barycentre[2] << "]";
+
+    qDebug() << "NB SOMMETS : " << _mesh->n_vertices();
+
+    VertexHandle handle_bary = _mesh->add_vertex(barycentre);
+    _mesh->set_color(handle_bary, MyMesh::Color(0, 255, 0));
+    _mesh->data(handle_bary).thickness = 10;
+    displayMesh(_mesh);
+
+    qDebug() << "NB SOMMETS : " << _mesh->n_vertices();
+}
+
+void MainWindow::frequenceAires(MyMesh* _mesh)
 {
     float aire_totale = 0;
     std::vector<float> aires;
@@ -92,121 +189,59 @@ void MainWindow::showSelections(MyMesh* _mesh)
     qDebug() << "Somme = " << t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10;
 }
 
+void MainWindow::valences(MyMesh *_mesh) {
+
+}
+
+void MainWindow::deviationNormales(MyMesh *_mesh) {
+
+}
+
+void MainWindow::anglesDiedres(MyMesh *_mesh) {
+
+}
+
 
 /* **** début de la partie boutons et IHM **** */
 
-void MainWindow::on_pushButton_bordure_clicked()
+void MainWindow::on_button_NbFAS_clicked()
 {
-    //showBorder(&mesh);
+    nbFacesSommetsAretes(&mesh);
 }
 
-void MainWindow::on_pushButton_voisinage_clicked()
+void MainWindow::on_button_VerifTopo_clicked()
 {
-    // changement de mode entre avec et sans voisinage
-    if(modevoisinage)
-    {
-        ui->pushButton_voisinage->setText("Repasser en mode normal");
-        modevoisinage = false;
-    }
-    else
-    {
-        ui->pushButton_voisinage->setText("Passer en mode voisinage");
-        modevoisinage = true;
-    }
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    verifTopologie(&mesh);
 }
 
-
-void MainWindow::on_pushButton_vertexMoins_clicked()
+void MainWindow::on_button_BoiteEnglo_clicked()
 {
-    // mise à jour de l'interface
-    vertexSelection = vertexSelection - 1;
-    ui->labelVertex->setText(QString::number(vertexSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    boiteEnglobante(&mesh);
 }
 
-void MainWindow::on_pushButton_vertexPlus_clicked()
+void MainWindow::on_button_Barycentre_clicked()
 {
-    // mise à jour de l'interface
-    vertexSelection = vertexSelection + 1;
-    ui->labelVertex->setText(QString::number(vertexSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    barycentre(&mesh);
 }
 
-void MainWindow::on_pushButton_edgeMoins_clicked()
+void MainWindow::on_button_FreqAires_clicked()
 {
-    // mise à jour de l'interface
-    edgeSelection = edgeSelection - 1;
-    ui->labelEdge->setText(QString::number(edgeSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    frequenceAires(&mesh);
 }
 
-void MainWindow::on_pushButton_edgePlus_clicked()
+void MainWindow::on_button_Valences_clicked()
 {
-    // mise à jour de l'interface
-    edgeSelection = edgeSelection + 1;
-    ui->labelEdge->setText(QString::number(edgeSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    valences(&mesh);
 }
 
-void MainWindow::on_pushButton_faceMoins_clicked()
+void MainWindow::on_button_DeviaNormales_clicked()
 {
-    // mise à jour de l'interface
-    faceSelection = faceSelection - 1;
-    ui->labelFace->setText(QString::number(faceSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
+    deviationNormales(&mesh);
 }
 
-void MainWindow::on_pushButton_facePlus_clicked()
+void MainWindow::on_button_AnglesDiedres_clicked()
 {
-    // mise à jour de l'interface
-    faceSelection = faceSelection + 1;
-    ui->labelFace->setText(QString::number(faceSelection));
-
-    // on montre la nouvelle selection
-    if(!modevoisinage)
-        showSelections(&mesh);
-    //else
-        //showSelectionsNeighborhood(&mesh);
-}
-
-void MainWindow::on_pushButton_afficherChemin_clicked()
-{
-    // on récupère les sommets de départ et d'arrivée
-    int indexV1 = ui->spinBox_v1_chemin->value();
-    int indexV2 = ui->spinBox_v2_chemin->value();
-
-    //showPath(&mesh, indexV1, indexV2);
+    anglesDiedres(&mesh);
 }
 
 
@@ -458,12 +493,6 @@ void MainWindow::displayMesh(MyMesh* _mesh, DisplayMode mode)
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    vertexSelection = -1;
-    edgeSelection = -1;
-    faceSelection = -1;
-
-    modevoisinage = false;
-
     ui->setupUi(this);
 }
 
@@ -471,4 +500,3 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-

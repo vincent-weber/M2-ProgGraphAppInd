@@ -41,11 +41,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    // les 4 fonctions à compléter
-    void showSelections(MyMesh* _mesh);
-    void showSelectionsNeighborhood(MyMesh* _mesh);
-    void showPath(MyMesh* _mesh, int v1, int v2);
-    void showBorder(MyMesh* _mesh);
+    void barycentre(MyMesh* _mesh);
+    void boiteEnglobante(MyMesh* _mesh);
+    void frequenceAires(MyMesh* _mesh);
+    void nbFacesSommetsAretes(MyMesh* _mesh);
+    void verifTopologie(MyMesh* _mesh);
+    void valences(MyMesh* _mesh);
+    void deviationNormales(MyMesh* _mesh);
+    void anglesDiedres(MyMesh* _mesh);
 
     void displayMesh(MyMesh *_mesh, DisplayMode mode = DisplayMode::Normal);
     void resetAllColorsAndThickness(MyMesh* _mesh);
@@ -53,25 +56,18 @@ public:
 private slots:
 
     void on_pushButton_chargement_clicked();
-    void on_pushButton_vertexMoins_clicked();
-    void on_pushButton_vertexPlus_clicked();
-    void on_pushButton_edgeMoins_clicked();
-    void on_pushButton_edgePlus_clicked();
-    void on_pushButton_faceMoins_clicked();
-    void on_pushButton_facePlus_clicked();
-    void on_pushButton_afficherChemin_clicked();
-    void on_pushButton_voisinage_clicked();
-    void on_pushButton_bordure_clicked();
+    void on_button_NbFAS_clicked();
+    void on_button_VerifTopo_clicked();
+    void on_button_BoiteEnglo_clicked();
+    void on_button_Barycentre_clicked();
+    void on_button_FreqAires_clicked();
+    void on_button_Valences_clicked();
+    void on_button_DeviaNormales_clicked();
+    void on_button_AnglesDiedres_clicked();
 
 private:
 
-    bool modevoisinage;
-
     MyMesh mesh;
-
-    int vertexSelection;
-    int edgeSelection;
-    int faceSelection;
 
     Ui::MainWindow *ui;
 };
