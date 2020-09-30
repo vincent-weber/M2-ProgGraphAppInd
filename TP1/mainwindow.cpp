@@ -66,8 +66,22 @@ void MainWindow::verifTopologie(MyMesh *_mesh) {
     qDebug() << "Le maillage contient " << nbSommetsSeuls << " sommets seuls.";
 }
 
-void MainWindow::boiteEnglobante(MyMesh *_mesh) {
 
+void MainWindow::boiteEnglobante(MyMesh *_mesh) {
+    float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
+    for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
+        for (MyMesh::FaceVertexIter fv_it=mesh.fv_iter(*curFace); fv_it.is_valid(); ++fv_it) {
+            if(_mesh->point(*fv_it)[0] < minX) minX = _mesh->point(*fv_it)[0];
+            else if(_mesh->point(*fv_it)[0] > maxX) maxX = _mesh->point(*fv_it)[0];
+            if(_mesh->point(*fv_it)[1] < minY) minY = _mesh->point(*fv_it)[1];
+            else if(_mesh->point(*fv_it)[1] > maxY) maxY = _mesh->point(*fv_it)[1];
+            if(_mesh->point(*fv_it)[2] < minZ) minZ = _mesh->point(*fv_it)[2];
+            else if(_mesh->point(*fv_it)[2] > maxZ) maxZ = _mesh->point(*fv_it)[2];
+        }
+    }
+    qDebug() << "Bounding box : x min " << minX << " max " << maxX
+             << " y min " << minY << " max " << maxY
+             << " z min " << minZ << " max " << maxZ;
 }
 
 void MainWindow::barycentre(MyMesh* _mesh) {
