@@ -16,15 +16,13 @@ void MainWindow::verifTopologie(MyMesh *_mesh) {
 
     //VERIF FACES
     for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
-        /*int nbSommetsAdjacents = 0;
+        int nbSommetsAdjacents = 0;
 
-        Ce for ci-dessous a fait crash mon ordi 2 fois
-
-        for (MyMesh::FaceVertexIter curVert = _mesh->fv_iter(*curFace) ; curVert->is_valid(); ++curVert, ++nbSommetsAdjacents);
+        for (MyMesh::FaceVertexIter curVert = _mesh->fv_iter(_mesh->face_handle(curFace->idx())); curVert.is_valid(); ++curVert, ++nbSommetsAdjacents);
         if (nbSommetsAdjacents != 3) {
             facesQueTriangulaires = false;
             ++nbFacesNonTriangulaires;
-        }*/
+        }
         int nbFacesAdjacentes = 0;
         for (MyMesh::FaceFaceIter curFace2 = _mesh->ff_iter(*curFace) ; curFace2.is_valid() ; ++curFace2, ++nbFacesAdjacentes);
         if (nbFacesAdjacentes == 0) {
