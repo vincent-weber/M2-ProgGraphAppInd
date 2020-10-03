@@ -207,30 +207,40 @@ void MainWindow::valences(MyMesh *_mesh) {
 
 }
 
+
 void MainWindow::deviationNormales(MyMesh *_mesh) {
+
+    for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
+        if (curFace->idx() == -1) {
+            qDebug() << "HIOHFIOEZIHFOEZIH";
+        }
+        _mesh->calc_face_normal(*curFace);
+        _mesh->update_normal(*curFace);
+    }
+
     for (MyMesh::VertexIter v_it=_mesh->vertices_begin(); v_it!=_mesh->vertices_end(); ++v_it) {
-        MyMesh::Normal normalVertex = _mesh->normal(*v_it);
+        MyMesh::Normal normalVertex = _mesh->calc_vertex_normal(*v_it);
         double angle_max = 0;
         for (MyMesh::VertexOHalfedgeIter he = _mesh->voh_iter(*v_it) ; he.is_valid() ; ++he) {
+            //BUG ICI face.idx = -1 pour les maillages cowhead et hexagon
             FaceHandle face = _mesh->face_handle(*he);
+            qDebug() << face.idx();
             MyMesh::Normal normalFace = _mesh->normal(face);
             double scal_prod = normalVertex.normalized() | normalFace.normalized();
             double angle = acos(scal_prod);
             if (abs(angle) > angle_max) {
                 angle_max = angle;
             }
-            /*qDebug() << "VERT NORMAL : " << normalVertex[0] << " " << normalVertex[1] << " " << normalVertex[2]
-                     << "VERT NORMAL NORMALIZED : " << normalVertex.normalized()[0] << " " << normalVertex.normalized()[1] << " " << normalVertex.normalized()[2]
-                     << "FACE NORMAL : " << normalFace[0] << " " << normalFace[1] << " " << normalFace[2]
-                     << " SCAL PROD : " << scal_prod << " ANGLE : " << angle << " ANGLE MAX : " << angle_max;*/
-            //return;
-            //qDebug() << "Angle max courant : " << angle_max;
+
+
+
         }
         float color = angle_max * (255.0f / PI);
         _mesh->set_color(*v_it, MyMesh::Color(0, color, 0));
         _mesh->data(*v_it).thickness = 10;
-        displayMesh(_mesh);
+
     }
+    displayMesh(_mesh);
 }
 
 void MainWindow::anglesDiedres(MyMesh *_mesh) {
