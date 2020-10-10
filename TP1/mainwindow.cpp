@@ -211,36 +211,35 @@ void MainWindow::valences(MyMesh *_mesh) {
 void MainWindow::deviationNormales(MyMesh *_mesh) {
 
     for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
-        if (curFace->idx() == -1) {
-            qDebug() << "HIOHFIOEZIHFOEZIH";
-        }
         _mesh->calc_face_normal(*curFace);
         _mesh->update_normal(*curFace);
     }
+
+    double sum = 0;
 
     for (MyMesh::VertexIter v_it=_mesh->vertices_begin(); v_it!=_mesh->vertices_end(); ++v_it) {
         MyMesh::Normal normalVertex = _mesh->calc_vertex_normal(*v_it);
         double angle_max = 0;
         for (MyMesh::VertexOHalfedgeIter he = _mesh->voh_iter(*v_it) ; he.is_valid() ; ++he) {
-            //BUG ICI face.idx = -1 pour les maillages cowhead et hexagon
             FaceHandle face = _mesh->face_handle(*he);
-            qDebug() << face.idx();
-            MyMesh::Normal normalFace = _mesh->normal(face);
-            double scal_prod = normalVertex.normalized() | normalFace.normalized();
-            double angle = acos(scal_prod);
-            if (abs(angle) > angle_max) {
-                angle_max = angle;
+            if (face.idx() != -1) {
+                MyMesh::Normal normalFace = _mesh->normal(face);
+                double scal_prod = normalVertex.normalized() | normalFace.normalized();
+                double angle = acos(scal_prod);
+                if (abs(angle) > angle_max) {
+                    angle_max = angle;
+                }
             }
-
-
-
         }
+        sum += angle_max;
+        qDebug() << angle_max;
         float color = angle_max * (255.0f / PI);
         _mesh->set_color(*v_it, MyMesh::Color(0, color, 0));
         _mesh->data(*v_it).thickness = 10;
 
     }
     displayMesh(_mesh);
+    qDebug() << "Moyenne : " << sum / _mesh->n_vertices();
 }
 
 void MainWindow::anglesDiedres(MyMesh *_mesh) {
