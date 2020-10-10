@@ -204,7 +204,26 @@ void MainWindow::frequenceAires(MyMesh* _mesh)
 }
 
 void MainWindow::valences(MyMesh *_mesh) {
+    std::vector<int> valences;
+    std::vector<int> nb_occurences;
+    for (MyMesh::VertexIter v_it=_mesh->vertices_begin(); v_it!=_mesh->vertices_end(); ++v_it) {
+        int valence = 0;
+        for (MyMesh::VertexVertexIter vv = _mesh->vv_iter(*v_it) ; vv.is_valid() ; ++vv) {
+            ++valence;
+        }
+        auto it = std::find(valences.begin(), valences.end(), valence);
+        if (it == valences.end()) {
+            valences.push_back(valence);
+            nb_occurences.push_back(1);
+        } else {
+            int index = std::distance(valences.begin(), it);
+            ++nb_occurences[index];
+        }
+    }
 
+    for (unsigned i = 0 ; i < valences.size() ; ++i) {
+        qDebug() << "Il y a " << nb_occurences[i] << " sommets qui ont une valence de " << valences[i] << ".";
+    }
 }
 
 
@@ -243,6 +262,35 @@ void MainWindow::deviationNormales(MyMesh *_mesh) {
 }
 
 void MainWindow::anglesDiedres(MyMesh *_mesh) {
+
+    for (MyMesh::FaceIter curFace = _mesh->faces_begin(); curFace != _mesh->faces_end(); curFace++) {
+        _mesh->calc_face_normal(*curFace);
+        _mesh->update_normal(*curFace);
+    }
+
+    std::vector<unsigned> nb_occurences;
+    nb_occurences.resize(36);
+
+    for (MyMesh::EdgeIter curEdge = _mesh->edges_begin(); curEdge != _mesh->edges_end(); curEdge++) {
+        FaceHandle f1 = _mesh->face_handle(_mesh->halfedge_handle(*curEdge, 0));
+        FaceHandle f2 = _mesh->face_handle(_mesh->halfedge_handle(*curEdge, 1));
+        if (f1.idx() != -1 && f2.idx() != -1) {
+            MyMesh::Normal normalF1 = _mesh->normal(f1);
+            MyMesh::Normal normalF2 = _mesh->normal(f2);
+
+            double scal_prod = normalF1.normalized() | normalF2.normalized();
+            double angle_rad = acos(scal_prod);
+            double angle_degrees = angle_rad * (180 / PI);
+            unsigned index = (unsigned)angle_degrees / 10;
+            qDebug() << angle_degrees;
+            qDebug() << index;
+            ++nb_occurences[index];
+        }
+    }
+
+    for (unsigned i = 0 ; i < nb_occurences.size() ; ++i) {
+        qDebug() << "Occurrences d'angles diedres compris entre " << i << "0 et " << i+1 << "0 degrés : " << nb_occurences[i];
+    }
 
 }
 
