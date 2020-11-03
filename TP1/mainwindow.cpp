@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #define PI 3.14159265
+#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(10)
 
 void MainWindow::nbFacesSommetsAretes(MyMesh *_mesh) {
     qDebug() << "Nombre de faces : " << _mesh->n_faces();
@@ -102,14 +103,10 @@ void MainWindow::barycentre(MyMesh* _mesh) {
     barycentre[2] = sumZ / _mesh->n_vertices();
     qDebug() << "Barycentre de coordonnées : [ " << barycentre[0] << ", " << barycentre[1] << ", " << barycentre[2] << "]";
 
-    qDebug() << "NB SOMMETS : " << _mesh->n_vertices();
-
     VertexHandle handle_bary = _mesh->add_vertex(barycentre);
     _mesh->set_color(handle_bary, MyMesh::Color(0, 255, 0));
     _mesh->data(handle_bary).thickness = 10;
     displayMesh(_mesh);
-
-    qDebug() << "NB SOMMETS : " << _mesh->n_vertices();
 }
 
 void MainWindow::frequenceAires(MyMesh* _mesh)
@@ -135,7 +132,6 @@ void MainWindow::frequenceAires(MyMesh* _mesh)
         VectorT<float,3> prod_vec = v12 % v13;
         float aire_triangle = 0.5f * (prod_vec.norm());
         aire_totale += aire_triangle;
-        qDebug() << "Aire triangle en cours : " << aire_triangle;
         if (aire_triangle > aire_max) {
             aire_max = aire_triangle;
         }
@@ -236,6 +232,9 @@ void MainWindow::deviationNormales(MyMesh *_mesh) {
 
     double sum = 0;
 
+    std::vector<unsigned> nb_occurences;
+    nb_occurences.resize(36);
+
     for (MyMesh::VertexIter v_it=_mesh->vertices_begin(); v_it!=_mesh->vertices_end(); ++v_it) {
         MyMesh::Normal normalVertex = _mesh->calc_vertex_normal(*v_it);
         double angle_max = 0;
@@ -251,14 +250,24 @@ void MainWindow::deviationNormales(MyMesh *_mesh) {
             }
         }
         sum += angle_max;
-        qDebug() << angle_max;
+        qDebug() << angle_max * 180.0f / PI;
+
+        int cnt = 0;
+        for (MyMesh::VertexFaceIter vf_it = _mesh->vf_iter(*v_it) ; vf_it.is_valid() ; ++vf_it, ++cnt);
+
+        double angle_degrees = angle_max * (180 / PI);
+        unsigned index = (unsigned)angle_degrees / 10;
+        ++nb_occurences[index];
+
         float color = angle_max * (255.0f / PI);
         _mesh->set_color(*v_it, MyMesh::Color(0, color, 0));
         _mesh->data(*v_it).thickness = 10;
-
     }
     displayMesh(_mesh);
-    qDebug() << "Moyenne : " << sum / _mesh->n_vertices();
+    for (unsigned i = 0 ; i < nb_occurences.size() ; ++i) {
+        qDebug() << "Occurrences d'angles de déviation de normales compris entre " << i << "0 et " << i+1 << "0 degrés : " << nb_occurences[i];
+    }
+    qDebug() << "Moyenne en degrés : " << (sum * 180.0f / PI) / _mesh->n_vertices();
 }
 
 void MainWindow::anglesDiedres(MyMesh *_mesh) {
@@ -282,9 +291,8 @@ void MainWindow::anglesDiedres(MyMesh *_mesh) {
             double angle_rad = acos(scal_prod);
             double angle_degrees = angle_rad * (180 / PI);
             unsigned index = (unsigned)angle_degrees / 10;
-            qDebug() << angle_degrees;
-            qDebug() << index;
             ++nb_occurences[index];
+            myqDebug() << angle_degrees;
         }
     }
 
